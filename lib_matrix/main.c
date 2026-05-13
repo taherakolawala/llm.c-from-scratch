@@ -234,6 +234,121 @@ void test_mul_row_times_column() {
     mat_free(&a); mat_free(&b); mat_free(&r);
 }
 
+/* ── mat_transpose ─────────────────────────────────── */
+
+void test_transpose_2x3() {
+    Matrix a, t;
+    mat_alloc(&a, 2, 3);
+    float ad[] = {1, 2, 3, 4, 5, 6};
+    for (int i = 0; i < 6; i++) a.data[i] = ad[i];
+
+    mat_transpose(&a, &t);
+
+    assert(t.rows == 3);
+    assert(t.cols == 2);
+    // [1 2 3]T = [1 4]
+    // [4 5 6]    [2 5]
+    //            [3 6]
+    ASSERT_FLOAT(mat_get(&t, 0, 0), 1.0f);
+    ASSERT_FLOAT(mat_get(&t, 0, 1), 4.0f);
+    ASSERT_FLOAT(mat_get(&t, 1, 0), 2.0f);
+    ASSERT_FLOAT(mat_get(&t, 1, 1), 5.0f);
+    ASSERT_FLOAT(mat_get(&t, 2, 0), 3.0f);
+    ASSERT_FLOAT(mat_get(&t, 2, 1), 6.0f);
+
+    mat_free(&a); mat_free(&t);
+}
+
+void test_transpose_square() {
+    Matrix a, t;
+    mat_alloc(&a, 3, 3);
+    float ad[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    for (int i = 0; i < 9; i++) a.data[i] = ad[i];
+
+    mat_transpose(&a, &t);
+
+    assert(t.rows == 3);
+    assert(t.cols == 3);
+    ASSERT_FLOAT(mat_get(&t, 0, 0), 1.0f);
+    ASSERT_FLOAT(mat_get(&t, 0, 1), 4.0f);
+    ASSERT_FLOAT(mat_get(&t, 0, 2), 7.0f);
+    ASSERT_FLOAT(mat_get(&t, 1, 0), 2.0f);
+    ASSERT_FLOAT(mat_get(&t, 1, 1), 5.0f);
+    ASSERT_FLOAT(mat_get(&t, 1, 2), 8.0f);
+    ASSERT_FLOAT(mat_get(&t, 2, 0), 3.0f);
+    ASSERT_FLOAT(mat_get(&t, 2, 1), 6.0f);
+    ASSERT_FLOAT(mat_get(&t, 2, 2), 9.0f);
+
+    mat_free(&a); mat_free(&t);
+}
+
+void test_transpose_1x1() {
+    Matrix a, t;
+    mat_alloc(&a, 1, 1);
+    a.data[0] = 42.0f;
+
+    mat_transpose(&a, &t);
+
+    assert(t.rows == 1);
+    assert(t.cols == 1);
+    ASSERT_FLOAT(t.data[0], 42.0f);
+
+    mat_free(&a); mat_free(&t);
+}
+
+void test_transpose_column_vector() {
+    Matrix a, t;
+    mat_alloc(&a, 4, 1);
+    a.data[0] = 1; a.data[1] = 2; a.data[2] = 3; a.data[3] = 4;
+
+    mat_transpose(&a, &t);
+
+    assert(t.rows == 1);
+    assert(t.cols == 4);
+    ASSERT_FLOAT(t.data[0], 1.0f);
+    ASSERT_FLOAT(t.data[1], 2.0f);
+    ASSERT_FLOAT(t.data[2], 3.0f);
+    ASSERT_FLOAT(t.data[3], 4.0f);
+
+    mat_free(&a); mat_free(&t);
+}
+
+void test_transpose_row_vector() {
+    Matrix a, t;
+    mat_alloc(&a, 1, 4);
+    a.data[0] = 5; a.data[1] = 6; a.data[2] = 7; a.data[3] = 8;
+
+    mat_transpose(&a, &t);
+
+    assert(t.rows == 4);
+    assert(t.cols == 1);
+    ASSERT_FLOAT(t.data[0], 5.0f);
+    ASSERT_FLOAT(t.data[1], 6.0f);
+    ASSERT_FLOAT(t.data[2], 7.0f);
+    ASSERT_FLOAT(t.data[3], 8.0f);
+
+    mat_free(&a); mat_free(&t);
+}
+
+void test_transpose_double_is_original() {
+    Matrix a, t1, t2;
+    mat_alloc(&a, 2, 4);
+    float ad[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    for (int i = 0; i < 8; i++) a.data[i] = ad[i];
+
+    mat_transpose(&a, &t1);
+    mat_transpose(&t1, &t2);
+
+    // (A^T)^T == A
+    assert(t2.rows == 2);
+    assert(t2.cols == 4);
+    for (int i = 0; i < 8; i++) {
+        ASSERT_FLOAT(t2.data[i], ad[i]);
+    }
+
+    mat_free(&a); mat_free(&t1); mat_free(&t2);
+}
+
 /* ── mat_print (smoke test, just make sure it doesn't crash) ── */
 
 void test_print_doesnt_crash() {
@@ -276,6 +391,14 @@ int main() {
     RUN_TEST(test_mul_zeros);
     RUN_TEST(test_mul_column_times_row);
     RUN_TEST(test_mul_row_times_column);
+
+    printf("\nmat_transpose:\n");
+    RUN_TEST(test_transpose_2x3);
+    RUN_TEST(test_transpose_square);
+    RUN_TEST(test_transpose_1x1);
+    RUN_TEST(test_transpose_column_vector);
+    RUN_TEST(test_transpose_row_vector);
+    RUN_TEST(test_transpose_double_is_original);
 
     printf("\nmat_print:\n");
     RUN_TEST(test_print_doesnt_crash);

@@ -33,6 +33,9 @@ void mat_set(Matrix* m, int row, int col, float val){
 }
 
 void mat_mul(Matrix* a, Matrix* b, Matrix* output){
+    if (a == NULL || b == NULL){
+        printf("Invalid matrix pointer.\n");
+    }
     if (output == a || output == b) {
         printf("Output must not alias input.\n");
         return;
@@ -53,6 +56,20 @@ void mat_mul(Matrix* a, Matrix* b, Matrix* output){
     }
     return;
 }
+
+void mat_transpose(Matrix* a, Matrix* output){
+    if (a == NULL){
+        printf("Invalid matrix pointer.\n");
+    }
+    mat_alloc(output, a->cols, a->rows);
+    for (int i = 0; i < a->cols; i++){
+        for (int j = 0; j < a->rows; j++){
+            output->data[i*(output->cols)+j] = a->data[j*(a->cols)+i]; 
+        }
+    }
+    return;
+}
+
 
 void mat_print(Matrix *m){
     if (m == NULL){

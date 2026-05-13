@@ -12,6 +12,7 @@ void mat_free(Matrix *m);
 float mat_get(Matrix* m, int rows, int cols);
 void mat_set(Matrix* m, int row, int col, float val);
 void mat_mul(Matrix* a, Matrix* b, Matrix* output);
+void mat_transpose(Matrix* a, Matrix* output);
 void mat_print(Matrix *m);
 
 #endif
